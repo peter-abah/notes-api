@@ -17,4 +17,10 @@ Rails.application.routes.draw do
       registrations: 'api/v1/registrations'
     }
   )
+
+  namespace :api do
+    namespace :v1 do
+      resources :notes, except: %i[edit new]
+    end
+  end
 end

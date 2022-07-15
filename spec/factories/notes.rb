@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :note do
-    title { "MyText" }
-    content { "MyText" }
+    title { Faker::Lorem.word }
+    content { Faker::Lorem.paragraph }
     user { nil }
   end
 end
