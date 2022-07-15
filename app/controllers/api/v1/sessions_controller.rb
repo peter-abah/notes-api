@@ -7,39 +7,19 @@ class Api::V1::SessionsController < Devise::SessionsController
   private
 
   def respond_with(resource, _opts = {})
-    render json: { message: 'Logged.', user: resource }, status: :ok
+    render json: { message: 'Logged.', data: resource }, status: :ok
   end
 
   def respond_to_on_destroy
+    pp(current_user:, request:)
     current_user ? log_out_success : log_out_failure
   end
 
   def log_out_success
-    render json: { message: "Logged out." }, status: :ok
+    head :no_content
   end
 
   def log_out_failure
-    render json: { message: "Logged out failure."}, status: :unauthorized
+    render json: { message: 'Not logged in' }, status: :bad_request
   end
-  # GET /resource/sign_in
-  # def new
-  #   super
-  # end
-
-  # POST /resource/sign_in
-  # def create
-  #   super
-  # end
-
-  # DELETE /resource/sign_out
-  # def destroy
-  #   super
-  # end
-
-  # protected
-
-  # If you have extra params to permit, append them to the sanitizer.
-  # def configure_sign_in_params
-  #   devise_parameter_sanitizer.permit(:sign_in, keys: [:attribute])
-  # end
 end

@@ -2,18 +2,15 @@
 
 class Api::V1::RegistrationsController < Devise::RegistrationsController
   respond_to :json
+
   private
 
   def respond_with(resource, _opts = {})
-    resource.persisted? ? register_success(resource) : register_failed(resource)
-  end
-
-  def register_success(resource)
-    render json: { message: 'Signed up.', user: resource }
-  end
-
-  def register_failed(resource)
-    render json: { message: "Signed up failure.", errors: resource.errors }
+    if resource.persisted?
+      render json: { data: resource }, status: :ok
+    else
+      render json: { errors: resource.errors }, status: :bad_request
+    end
   end
   # before_action :configure_sign_up_params, only: [:create]
   # before_action :configure_account_update_params, only: [:update]
