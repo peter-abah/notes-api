@@ -8,7 +8,6 @@ class Api::V1::SessionsController < Devise::SessionsController
   private
 
   def respond_with(resource, _opts = {})
-    pp resource
     render json: { message: 'Logged.', data: resource }, status: :ok
   end
 
