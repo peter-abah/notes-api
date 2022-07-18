@@ -24,7 +24,7 @@ describe 'Sessions', type: :request do
     end
 
     it 'returns the user email' do
-      expect(json_body['data']).to include('email' => email)
+      expect(json_body['user']).to include('email' => email)
     end
   end
 

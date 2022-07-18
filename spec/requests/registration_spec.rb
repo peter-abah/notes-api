@@ -24,7 +24,7 @@ describe 'Registrations', type: :request do
     end
 
     it 'returns the user email' do
-      expect(json_body['data']).to include('email' => user.email)
+      expect(json_body['user']).to include('email' => user.email)
     end
   end
 

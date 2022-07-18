@@ -7,7 +7,7 @@ class Api::V1::RegistrationsController < Devise::RegistrationsController
 
   def respond_with(resource, _opts = {})
     if resource.persisted?
-      render json: { data: resource }, status: :ok
+      render json: { user: resource }, status: :ok
     else
       render json: { errors: resource.errors }, status: :bad_request
     end

@@ -23,7 +23,7 @@ RSpec.describe "Notes", type: :request do
       end
 
       it 'returns user notes' do
-        expect(json_body['data'].size).to eq(notes_size)
+        expect(json_body['notes'].size).to eq(notes_size)
       end
     end
 
@@ -58,8 +58,8 @@ RSpec.describe "Notes", type: :request do
       end
 
       it 'returns the correct note' do
-        expect(json_body['data']['title']).to eq(title)
-        expect(json_body['data']['content']).to eq(content)
+        expect(json_body['note']['title']).to eq(title)
+        expect(json_body['note']['content']).to eq(content)
       end
     end
 
@@ -234,7 +234,7 @@ RSpec.describe "Notes", type: :request do
       end
 
       it 'updates the note' do
-        expect(json_body['data']['title']).to eq(new_title)
+        expect(json_body['note']['title']).to eq(new_title)
       end
     end
 

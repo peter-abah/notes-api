@@ -4,18 +4,18 @@ class Api::V1::NotesController < ApplicationController
 
   def index
     notes = current_user.notes
-    render json: { data: notes }, status: :ok
+    render json: { notes: notes }, status: :ok
   end
 
   def show
-    render json: { data: @note }, status: :ok
+    render json: { note: @note }, status: :ok
   end
 
   def create
     note = current_user.notes.build(note_params)
 
     if note.save
-      render json: { data: note }, status: :created
+      render json: { note: note }, status: :created
     else
       render json: { errors: note.errors }, status: :unprocessable_entity
     end
@@ -28,7 +28,7 @@ class Api::V1::NotesController < ApplicationController
 
   def update
     if @note.update(note_params)
-      render json: { data: @note }, status: :ok
+      render json: { note: @note }, status: :ok
     else
       render json: { errors: @note.errors }, status: :unprocessable_entity
     end
