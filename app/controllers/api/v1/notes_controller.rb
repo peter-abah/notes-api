@@ -3,7 +3,12 @@ class Api::V1::NotesController < ApplicationController
   before_action :set_note, only: %i[show destroy update]
 
   def index
-    notes = current_user.notes
+    if params[:collection_id]
+      collection = current_user.collections.find(params[:collection_id])
+      notes = collection.notes
+    else
+      notes = current_user.notes
+    end
     render json: { notes: notes }, status: :ok
   end
 
