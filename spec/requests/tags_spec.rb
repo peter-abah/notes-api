@@ -1,13 +1,13 @@
 require 'rails_helper'
 
-RSpec.describe "Notes", type: :request do
+RSpec.describe "Tags", type: :request do
   let!(:user) { FactoryBot.create(:user) }
 
   describe "GET /index" do
-    let(:notes_size) { 5 }
-    let!(:notes) { FactoryBot.create_list(:note, notes_size, user:) }
+    let(:tags_size) { 5 }
+    let!(:tags) { FactoryBot.create_list(:tag, tags_size, user:) }
 
-    let(:index_url) { '/api/v1/notes' }
+    let(:index_url) { '/api/v1/tags' }
 
     context 'when logged in' do
       before do
@@ -22,8 +22,8 @@ RSpec.describe "Notes", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      it 'returns user notes' do
-        expect(json_body['notes'].size).to eq(notes_size)
+      it 'returns user tags' do
+        expect(json_body['tags'].size).to eq(tags_size)
       end
     end
 
@@ -36,13 +36,13 @@ RSpec.describe "Notes", type: :request do
     end
   end
 
-  describe "GET /collection/:id/notes" do
-    let(:notes_size) { 5 }
-    let!(:collection) { FactoryBot.create(:collection, user:) }
-    let!(:notes) { FactoryBot.create_list(:note, notes_size, user:, collection:) }
+  describe "GET /notes/:id/tags" do
+    let(:tags_size) { 5 }
+    let!(:note) { FactoryBot.create(:note, user:) }
+    let!(:tags) { FactoryBot.create_list(:tag, tags_size, user:, notes: [note]) }
     let!(:other_user) { FactoryBot.create(:user) }
 
-    let(:url) { "/api/v1/collections/#{collection.id}/notes" }
+    let(:url) { "/api/v1/notes/#{note.id}/tags" }
 
 
     context 'when logged in' do
@@ -58,60 +58,8 @@ RSpec.describe "Notes", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      it 'returns collection notes' do
-        expect(json_body['notes'].size).to eq(notes_size)
-        expect(json_body['notes']).to all( include("collection_id" => collection.id))
-      end
-    end
-    
-    context "when user does not own collection" do
-      before do
-        login_with_api(other_user)
-
-        get url, headers: {
-          'Authorization': response.headers['Authorization']
-        }
-      end
-
-      it 'returns 404' do
-        expect(response).to have_http_status(:not_found)
-      end
-    end
-
-    context 'When Authorization header is not passed' do
-      it 'returns 401' do
-        get url
-
-        expect(response).to have_http_status(:unauthorized)
-      end
-    end
-  end
-
-  describe "GET /tags/:id/notes" do
-    let(:notes_size) { 5 }
-    let!(:tag) { FactoryBot.create(:tag, user:) }
-    let!(:notes) { FactoryBot.create_list(:note, notes_size, user:, tags: [tag]) }
-    let!(:other_user) { FactoryBot.create(:user) }
-
-    let(:url) { "/api/v1/tags/#{tag.id}/notes" }
-
-
-    context 'when logged in' do
-      before do
-        login_with_api(user)
-
-        get url, headers: {
-          'Authorization': response.headers['Authorization']
-        }
-      end
-
-      it 'returns 200' do
-        expect(response).to have_http_status(:ok)
-      end
-
-      it 'returns tag notes' do
-        expect(json_body['notes'].size).to eq(notes_size)
-        expect(json_body['notes']).to all(include('tag_ids' => [tag.id]))
+      it 'returns note tags' do
+        expect(json_body['tags'].size).to eq(tags_size)
       end
     end
 
@@ -138,13 +86,12 @@ RSpec.describe "Notes", type: :request do
     end
   end
 
-  describe "GET /notes/:id" do
-    let(:title) { 'Note title' }
-    let(:content) { 'Note Content' }
-    let!(:note) { FactoryBot.create(:note, title:, content:, user:) }
+  describe "GET /tags/:id" do
+    let(:name) { 'Tag name' }
+    let!(:tag) { FactoryBot.create(:tag, name:, user:) }
     let!(:other_user) { FactoryBot.create(:user) }
 
-    let(:url) { "/api/v1/notes/#{note.id}" }
+    let(:url) { "/api/v1/tags/#{tag.id}" }
 
     context 'when logged in' do
       before do
@@ -159,9 +106,8 @@ RSpec.describe "Notes", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      it 'returns the correct note' do
-        expect(json_body['note']['title']).to eq(title)
-        expect(json_body['note']['content']).to eq(content)
+      it 'returns the correct tag' do
+        expect(json_body['tag']['name']).to eq(name)
       end
     end
 
@@ -173,7 +119,7 @@ RSpec.describe "Notes", type: :request do
       end
     end
 
-    context 'when note does no belong to user' do
+    context 'when tag does not belong to user' do
       before do
         login_with_api(other_user)
 
@@ -188,8 +134,8 @@ RSpec.describe "Notes", type: :request do
     end
   end
 
-  describe 'POST /api/v1/notes' do
-    let(:url) { '/api/v1/notes' }
+  describe 'POST /api/v1/tags' do
+    let(:url) { '/api/v1/tags' }
 
     context 'when logged in' do
       before do
@@ -199,9 +145,8 @@ RSpec.describe "Notes", type: :request do
           url,
           headers: { 'Authorization': response.headers['Authorization'] },
           params: {
-            note: {
-              title: 'title',
-              content: 'content '
+            tag: {
+              name: 'name',
             }
           }
         )
@@ -215,9 +160,8 @@ RSpec.describe "Notes", type: :request do
     context 'when unauthenticated' do
       it 'returns 401' do
         post url, params: {
-          note: {
-            title: 'title',
-            content: 'content'
+          tag: {
+            name: 'name',
           }
         }
 
@@ -225,7 +169,7 @@ RSpec.describe "Notes", type: :request do
       end
     end
 
-    context 'when title is missing' do
+    context 'when name is missing' do
       before do
         login_with_api(user)
 
@@ -233,9 +177,8 @@ RSpec.describe "Notes", type: :request do
           url,
           headers: { 'Authorization': response.headers['Authorization'] },
           params: {
-            note: {
-              title: '',
-              content: 'content '
+            tag: {
+              name: '',
             }
           }
         )
@@ -247,11 +190,11 @@ RSpec.describe "Notes", type: :request do
     end
   end
 
-  describe "DELETE /api/v1/notes/:id" do
+  describe "DELETE /api/v1/tags/:id" do
     let!(:other_user) { FactoryBot.create(:user) }
-    let!(:note) { FactoryBot.create(:note, user:) }
-    let(:url) { "/api/v1/notes/#{note.id}" }
-    let(:wrong_url) { '/api/v1/notes/456' }
+    let!(:tag) { FactoryBot.create(:tag, user:) }
+    let(:url) { "/api/v1/tags/#{tag.id}" }
+    let(:wrong_url) { '/api/v1/tags/456' }
 
     context 'when logged in' do
       before do
@@ -275,7 +218,7 @@ RSpec.describe "Notes", type: :request do
       end
     end
 
-    context 'when note does not exist' do
+    context 'when tag does not exist' do
       before do
         login_with_api(user)
 
@@ -290,7 +233,7 @@ RSpec.describe "Notes", type: :request do
     end
 
 
-    context 'when user does not own note' do
+    context 'when user does not own tag' do
       before do
         login_with_api(other_user)
 
@@ -305,14 +248,14 @@ RSpec.describe "Notes", type: :request do
     end
   end
 
-  describe "PATCH /api/v1/notes/:id" do
+  describe "PATCH /api/v1/tags/:id" do
     let!(:other_user) { FactoryBot.create(:user) }
-    let!(:note) { FactoryBot.create(:note, user:) }
+    let!(:tag) { FactoryBot.create(:tag, user:) }
 
-    let(:new_title) { 'New title' }
+    let(:new_name) { 'New name' }
 
-    let(:url) { "/api/v1/notes/#{note.id}" }
-    let(:wrong_url) { '/api/v1/notes/456' }
+    let(:url) { "/api/v1/tags/#{tag.id}" }
+    let(:wrong_url) { '/api/v1/tags/456' }
 
     context 'when logged in' do
       before do
@@ -324,8 +267,8 @@ RSpec.describe "Notes", type: :request do
             'Authorization':  response.headers['Authorization']
           },
           params: {
-            note: {
-              title: new_title
+            tag: {
+              name: new_name
             }
           }
         )
@@ -335,16 +278,16 @@ RSpec.describe "Notes", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      it 'updates the note' do
-        expect(json_body['note']['title']).to eq(new_title)
+      it 'updates the tag' do
+        expect(json_body['tag']['name']).to eq(new_name)
       end
     end
 
     context 'when unauthenticated' do
       it 'returns 401' do
         patch url, params: {
-          note: {
-            title: new_title
+          tag: {
+            name: new_name
           }
         }
 
@@ -352,7 +295,7 @@ RSpec.describe "Notes", type: :request do
       end
     end
 
-    context 'when note does not exist' do
+    context 'when tag does not exist' do
       before do
         login_with_api(user)
 
@@ -362,8 +305,8 @@ RSpec.describe "Notes", type: :request do
             'Authorization':  response.headers['Authorization']
           },
           params: {
-            note: {
-              title: new_title
+            tag: {
+              name: new_name
             }
           }
         )
@@ -374,7 +317,7 @@ RSpec.describe "Notes", type: :request do
       end
     end
 
-    context 'when user does not own note' do
+    context 'when user does not own tag' do
       before do
         login_with_api(other_user)
 
@@ -384,8 +327,8 @@ RSpec.describe "Notes", type: :request do
             'Authorization':  response.headers['Authorization']
           },
           params: {
-            note: {
-              title: new_title
+            tag: {
+              name: new_name
             }
           }
         )

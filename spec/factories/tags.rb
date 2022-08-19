@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :tag do
-    name { "MyString" }
+    name { Faker::Lorem.word  }
+    user { nil }
   end
 end
